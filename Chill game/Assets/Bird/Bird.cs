@@ -15,10 +15,14 @@ public class Bird : MonoBehaviour
     public float regularHieght;
     public float speed;
     public float attackRange;
+    public float damage;
+
+    public GameObject peckObject;
 
     void Awake()
     {
         rb  = GetComponent<Rigidbody>();
+        target = GameObject.Find("Player").transform;
     }
 
 
@@ -51,11 +55,31 @@ public class Bird : MonoBehaviour
         transform.LookAt(target);
         transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x*0, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
 
-        height = Mathf.Lerp(height, target.position.y+4, Time.deltaTime);
+        height = Mathf.Lerp(height, target.position.y+9, Time.deltaTime);
 
-        if (Mathf.Abs(height-target.position.y)< 5)
+        if (Mathf.Abs(height-target.position.y)< 11)
         {
             anim.SetTrigger("Peck");
+        }
+
+        AnimatorClipInfo[ ] clip = anim.GetCurrentAnimatorClipInfo(0);
+        int frame = (int) (clip[0].weight * (clip[0].clip.length * clip[0].clip.frameRate));
+
+        if (frame >= 12 & frame <= 16)
+        {
+            peckObject.SetActive(true);
+            Collider[] peckTargets = Physics.OverlapSphere(peckObject.transform.position, 1);
+
+            for(int i = 0; i < peckTargets.Length; i++) {
+                if (peckTargets[i].gameObject.tag == "Player")
+                {
+                    peckTargets[i].transform.parent.GetComponent<HEalth>().health -= damage;
+                }
+            }
+            
+        } else
+        {
+            peckObject.SetActive(false);
         }
     }
 }
